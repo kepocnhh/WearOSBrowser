@@ -9,6 +9,7 @@ repositories {
     google()
     mavenCentral()
     maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
+    maven("https://maven.mozilla.org/maven2")
 }
 
 plugins {
@@ -95,6 +96,8 @@ androidComponents.onVariants { variant ->
                 val applicationId by variant.applicationId
                 val expected = setOf(
                     "$applicationId.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+                    "android.permission.ACCESS_NETWORK_STATE",
+                    "android.permission.INTERNET",
                 )
                 check(actual.sorted() == expected.sorted()) {
                     "Actual is:\n$actual\nbut expected is:\n$expected"
@@ -114,9 +117,10 @@ dependencies {
 //    debugImplementation("androidx.compose.ui:ui-tooling-preview:${Version.Android.compose}")
 //    debugImplementation("androidx.wear:wear-tooling-preview:1.0.0")
 //    implementation("androidx.security:security-crypto:1.0.0")
-    implementation("com.github.kepocnhh:Logics:0.1.3-SNAPSHOT")
+//    implementation("com.github.kepocnhh:Logics:0.1.3-SNAPSHOT")
 //    implementation("com.github.kepocnhh:Storages:0.4.2u-SNAPSHOT")
 //    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 //    "watchImplementation"("androidx.wear.compose:compose-foundation:1.3.1")
 //    runtimeOnly("androidx.lifecycle:lifecycle-runtime:2.8.0")
+    implementation("org.mozilla.geckoview:geckoview-omni:126.0.20240526221752")
 }
