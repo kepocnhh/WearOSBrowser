@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -57,35 +56,19 @@ internal fun BrowserScreen() {
         val context = LocalContext.current
         val runtime = remember {
             val settings = GeckoRuntimeSettings.Builder()
-//                .allowInsecureConnections(GeckoRuntimeSettings.ALLOW_ALL)
                 .build()
             val value = GeckoRuntime
                 .create(context, settings)
             mutableStateOf(value)
         }.value
         val session = remember {
-            val session = GeckoSession()
-            session.contentDelegate = object : GeckoSession.ContentDelegate {
-                override fun onContextMenu(
-                    session: GeckoSession,
-                    screenX: Int,
-                    screenY: Int,
-                    element: GeckoSession.ContentDelegate.ContextElement,
-                ) {
-                    val message = """
-                        onContextMenu:
-                        element:
-                        type: ${element.type}
-                        link: ${element.linkUri}
-                    """.trimIndent()
-                    Log.d(TAG, message)
-                }
-
+            val value = GeckoSession()
+            value.contentDelegate = object : GeckoSession.ContentDelegate {
                 override fun onExternalResponse(session: GeckoSession, response: WebResponse) {
                     onWebResponse(response)
                 }
             }
-            session.navigationDelegate = object : GeckoSession.NavigationDelegate {
+            value.navigationDelegate = object : GeckoSession.NavigationDelegate {
                 override fun onLocationChange(
                     session: GeckoSession,
                     url: String?,
@@ -98,23 +81,9 @@ internal fun BrowserScreen() {
                 override fun onCanGoBack(session: GeckoSession, canGoBack: Boolean) {
                     canGoBackState.value = canGoBack
                 }
-
-//                override fun onLoadRequest(
-//                    session: GeckoSession,
-//                    request: GeckoSession.NavigationDelegate.LoadRequest,
-//                ): GeckoResult<AllowOrDeny> {
-//                    if (request.target == GeckoSession.NavigationDelegate.TARGET_WINDOW_NEW) {
-//                        session.loadUri(request.uri)
-//                    }
-//                    return GeckoResult.fromValue(AllowOrDeny.ALLOW)
-//                }
             }
-//            session.settings.allowJavascript = true
-//            session.settings.viewportMode = GeckoSessionSettings.VIEWPORT_MODE_MOBILE
-//            session.settings.userAgentMode = GeckoSessionSettings.USER_AGENT_MODE_MOBILE
-//            session.settings.userAgentOverride = null
-            session.open(runtime)
-            mutableStateOf(session)
+            value.open(runtime)
+            mutableStateOf(value)
         }.value
         val requested = remember { mutableStateOf<String?>(null) }
         AndroidView(
@@ -137,21 +106,15 @@ internal fun BrowserScreen() {
         )
         val uri = requested.value
         if (uri == null) {
-//            val expected = "about:config"
-//            val expected = "about:buildconfig"
-//            val expected = "https://unsplash.com/wallpapers/animals/panda"
-            val expected = "google.com"
-//            val expected = "github.com"
-            val text = "go to:\n$expected"
+            val target = "google.com"
+            val text = "go to:\n$target"
             BasicText(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.5f))
-                    .align(Alignment.Center)
                     .clickable(enabled = requested.value == null) {
-                        requested.value = expected
+                        requested.value = target
                     }
-                    .padding(16.dp)
                     .wrapContentSize(),
                 text = text,
                 style = TextStyle(color = Color.White, textAlign = TextAlign.Center),
