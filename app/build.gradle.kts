@@ -122,5 +122,8 @@ dependencies {
 //    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 //    "watchImplementation"("androidx.wear.compose:compose-foundation:1.3.1")
 //    runtimeOnly("androidx.lifecycle:lifecycle-runtime:2.8.0")
-    implementation("org.mozilla.geckoview:geckoview-omni:126.0.20240526221752")
+//    val channel = "omni"
+    val channel = "arm64-v8a"
+//    val channel = "armeabi-v7a"
+    implementation("org.mozilla.geckoview:geckoview-${channel}:126.0.20240526221752")
 }
