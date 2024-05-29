@@ -47,7 +47,7 @@ android {
         applicationId = namespace
         minSdk = Version.Android.minSdk
         targetSdk = Version.Android.targetSdk
-        versionCode = 1
+        versionCode = 2
         versionName = "0.0.$versionCode"
         manifestPlaceholders["appName"] = "@string/app_name"
     }
@@ -113,6 +113,7 @@ androidComponents.onVariants { variant ->
 dependencies {
     implementation(compose.foundation)
     implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.wear.compose:compose-foundation:1.3.1")
     val channel = "arm64-v8a"
     implementation("org.mozilla.geckoview:geckoview-${channel}:126.0.20240526221752")
 }

@@ -1,6 +1,5 @@
 package org.kepocnhh.wosbrowser.module.browser
 
-import android.os.Environment
 import android.util.Log
 import android.view.ViewGroup
 import androidx.compose.foundation.background
@@ -27,23 +26,9 @@ import org.mozilla.geckoview.GeckoRuntimeSettings
 import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.GeckoView
 import org.mozilla.geckoview.WebResponse
-import java.util.UUID
+import java.io.InputStream
 
 private const val TAG = "[Browser]"
-
-private fun onWebResponse(response: WebResponse) {
-    Log.d(TAG, "on web response: $response: ${response.uri}")
-    val body = response.body
-    if (body == null) {
-        Log.d(TAG, "body of ${response.uri} is null")
-        return
-    }
-    val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-    val file = dir.resolve(UUID.randomUUID().toString())
-    Log.d(TAG, "try download ${response.uri} to ${file.absolutePath}")
-    file.writeBytes(body.readBytes())
-    Log.d(TAG, "write ${file.absolutePath} ok")
-}
 
 @Composable
 internal fun BrowserScreen() {
@@ -61,11 +46,16 @@ internal fun BrowserScreen() {
                 .create(context, settings)
             mutableStateOf(value)
         }.value
+        val download = remember { mutableStateOf<Pair<String, InputStream>?>(null) }
         val session = remember {
             val value = GeckoSession()
             value.contentDelegate = object : GeckoSession.ContentDelegate {
                 override fun onExternalResponse(session: GeckoSession, response: WebResponse) {
-                    onWebResponse(response)
+                    Log.d(TAG, "on external response: ${response.uri}")
+                    val body = response.body
+                    if (download.value == null && body != null) {
+                        download.value = response.uri to body
+                    }
                 }
             }
             value.navigationDelegate = object : GeckoSession.NavigationDelegate {
@@ -99,9 +89,7 @@ internal fun BrowserScreen() {
             },
             update = {
                 val uri = requested.value
-                if (uri != null) {
-                    session.loadUri(uri)
-                }
+                // todo
             }
         )
         val uri = requested.value
@@ -114,6 +102,7 @@ internal fun BrowserScreen() {
                     .background(Color.Black.copy(alpha = 0.5f))
                     .clickable(enabled = requested.value == null) {
                         requested.value = target
+                        session.loadUri(target)
                     }
                     .wrapContentSize(),
                 text = text,
@@ -133,6 +122,16 @@ internal fun BrowserScreen() {
                     .wrapContentSize(),
                 text = "<",
                 style = TextStyle(color = Color.White),
+            )
+        }
+        val pair = download.value
+        if (pair != null) {
+            DownloadFileScreen(
+                onBack = {
+                    download.value = null
+                },
+                uri = pair.first,
+                body = pair.second,
             )
         }
     }
