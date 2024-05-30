@@ -22,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import org.mozilla.geckoview.GeckoRuntime
-import org.mozilla.geckoview.GeckoRuntimeSettings
 import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.GeckoView
 import org.mozilla.geckoview.WebResponse
@@ -40,10 +39,7 @@ internal fun BrowserScreen() {
         val canGoBackState = remember { mutableStateOf(false) }
         val context = LocalContext.current
         val runtime = remember {
-            val settings = GeckoRuntimeSettings.Builder()
-                .build()
-            val value = GeckoRuntime
-                .create(context, settings)
+            val value = GeckoRuntime.getDefault(context)
             mutableStateOf(value)
         }.value
         val download = remember { mutableStateOf<Pair<String, InputStream>?>(null) }

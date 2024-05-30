@@ -19,7 +19,6 @@ plugins {
 }
 
 fun ComponentIdentity.getVersion(): String {
-    if (productFlavors.isNotEmpty()) TODO()
     val versionName = android.defaultConfig.versionName ?: error("No version name!")
     check(versionName.isNotBlank())
     val versionCode = android.defaultConfig.versionCode ?: error("No version code!")
@@ -31,10 +30,18 @@ fun ComponentIdentity.getVersion(): String {
             name,
             versionCode.toString(),
         )
-        "release" -> kebabCase(
-            versionName,
-            versionCode.toString(),
-        )
+        "release" -> when (flavorName) {
+            "arm64v8" -> kebabCase(
+                versionName,
+                versionCode.toString(),
+            )
+            "armeabi32" -> kebabCase(
+                versionName,
+                "a32",
+                versionCode.toString(),
+            )
+            else -> error("Flavor \"$flavorName\" is not supported!")
+        }
         else -> error("Build type \"${buildType}\" is not supported!")
     }
 }
@@ -59,6 +66,20 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             manifestPlaceholders["buildType"] = name
+        }
+    }
+
+    productFlavors {
+        "cpu".also { dimension ->
+            flavorDimensions += dimension
+            create("arm64v8") {
+                this.dimension = dimension
+            }
+            create("armeabi32") {
+                this.dimension = dimension
+                versionNameSuffix = ".a32"
+                applicationIdSuffix = ".a32"
+            }
         }
     }
 
@@ -114,6 +135,6 @@ dependencies {
     implementation(compose.foundation)
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.wear.compose:compose-foundation:1.3.1")
-    val channel = "arm64-v8a"
-    implementation("org.mozilla.geckoview:geckoview-${channel}:126.0.20240526221752")
+    "arm64v8Implementation"("org.mozilla.geckoview:geckoview-arm64-v8a:126.0.20240526221752")
+    "armeabi32Implementation"("org.mozilla.geckoview:geckoview-armeabi-v7a:126.0.20240526221752")
 }
